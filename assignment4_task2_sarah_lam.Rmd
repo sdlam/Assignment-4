@@ -14,6 +14,7 @@ library(janitor)
 library(kableExtra)
 library(lubridate)
 library(ggbeeswarm)
+library(effsize)
 ```
 
 
@@ -66,21 +67,27 @@ Visualize juvenile hare weights. Create a finalized data visualization (or visua
 
 ```{r}
 juvenile_hares <- hares %>% 
-  filter(age == "j")
+  filter(age == "j") %>% 
+  mutate(sex = case_when(sex == "f" ~ "female",
+                        sex == "m" ~ "male")) %>% 
+  mutate(grid_full = case_when(grid == "bonrip" ~ "Riparian Habitat", 
+                               grid == "bonmat" ~ "Mature Stand Habitat", 
+                               grid == "bonbs" ~ "Black Spruce Habitat"))
 
 ggplot(data = juvenile_hares, aes(x = sex, y = weight)) +
-  geom_beeswarm(aes(color = sex)) +
-  facet_wrap(~grid) +
-  scale_color_manual(values = c("goldenrod2","cyan4","coral")) +
+  geom_beeswarm(aes(color = sex), 
+                show.legend = FALSE) +
+  facet_wrap(~grid_full) +
+  scale_color_manual(values = c("goldenrod2","cyan4","grey")) +
   geom_boxplot(fill = NA, width = 0.2, outlier.color = NA) +
-  theme_minimal() +
+  theme_linedraw() +
    stat_summary(fun=mean, 
                geom="point", 
                shape=20, 
                size=4, 
                color="black", 
                fill="black") +
-  labs(x = "Hare Sampling Site",
+  labs(x = "Hare Sex", 
        y = "Weight (g)")
 ```
 
@@ -106,17 +113,32 @@ hares_summary <- juvenile_hares %>%
   group_by(sex) %>% 
   summarize(mean_weight = round(mean(weight, na.rm = TRUE),2),
             sd_weight = round(sd(weight, na.rm = TRUE),2),
+            median_weight = round(median(weight, na.rm = TRUE),2),
             n = n())
 
-hares_summary
+hares_summary %>% 
+  kable(col.names = c("Sex",
+                      "Mean Weight (g)",
+                      "Median Weight (g)",
+                      "Standard Deviation",
+                      "Sample Size (n)"),
+        caption = "Fig. 3. This table shows a summary of the mean hare weight (g), median hare weight (g), the standard deviation, and the sample size for male and female hares.") %>% 
+  kable_styling(full_width = FALSE)
 ```
  
 Note: Exploratory graphs (e.g. histograms, QQ-plots) to explore assumptions of your t-test should not show up in your final knitted document, but you DO still need to create and think about them to determine whether a t-test is appropriate. If you want keep the code chunk containing those exploratory visualizations in your .Rmd but not appear in the knitted doc, you can add `include = FALSE` in the code chunk header.
+```{r}
+
+```
 
 Relationship between juvenile weight & hind foot length. Explore the relationship between juvenile snowshoe hare hind foot length (variable `hindft`, recorded in millimeters), and weight. Include all juvenile hares in the study. Create a final visualization of juvenile hare hind foot length versus weight. Include a figure caption.
 
 ```{r}
-
+ggplot(data = juvenile_hares, aes(x = hindft, y = weight)) +
+  geom_point() +
+  labs(x = "Hind Foot Length (mm)",
+       y = "Hare Weight (g)") +
+  theme_minimal()
 ```
 
 Upon seeing your graph, your “boss” tells you to try out linear regression to describe how juvenile snowshoe hare weight changes with respect to hind foot length. Try it out (the only variables you are expected to include here are hind foot length and weight, using data for all juvenile hares in the data, e.g. you are not expected to explore impacts of sex, site, etc.), and check the model diagnostics.
