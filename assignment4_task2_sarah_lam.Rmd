@@ -13,14 +13,15 @@ library(here)
 library(janitor)
 library(kableExtra)
 library(lubridate)
+library(ggbeeswarm)
 ```
 
 
-# Introduction
+# 1. Overview
 
 Introduction: A 4 - 5 sentence "mini-introduction" to what this study is exploring, including basic background information about the subject, site and study (with citations as needed), and a brief overview of what is included in the exploratory report. You should probably do this last so you know what’s contained in the report.
 
-# Data and Analyses
+# 2. Data and Analyses
 
 A 3 - 4 sentence section in which you briefly describe the data, including citation & credit as needed, and provide an overview of the main analysis, statistical methods and tools used.
 
@@ -32,10 +33,11 @@ Kielland, K., F.S. Chapin, R.W. Ruess, and Bonanza Creek LTER. 2017. Snowshoe ha
 hares <- read_csv(here("data", "bonanza_hares.csv"))
 ```
 
-## Juvenile hare initial investigation: In this section, complete and communicate the following: 
+# 3. Preliminary Results
+## A. Juvenile hare trapping data 
 
 Annual juvenile hare trap counts. Count the total number of juvenile hare trappings during each year of the study, and create a finalized data visualization of the counts by year. Include a figure caption below the figure in your report. 
-```{r}
+```{r fig.cap = "this figure shows..."}
 juvenile_traps <- hares %>% 
   filter(age == "j") %>% 
   mutate(date_class = mdy(date)) %>% 
@@ -44,7 +46,11 @@ juvenile_traps <- hares %>%
   summarize(count = n())
   
 ggplot(data = juvenile_traps, aes(x = year, y = count)) +
-  geom_line()
+  geom_line() +
+  scale_x_continuous(breaks = 1999:2012) +
+  theme_minimal() +
+  labs(x = "Year",
+       y = "Juvenile Hares Trapped")
 ```
 
 Then, in 3 - 4 sentences below your figure, describe major takeaways from your graph about total snowshoe hare trappings at the site. You might consider:
@@ -54,16 +60,28 @@ Mean or median annual number of juvenile hares trapped?
 General/notable trends?
 These are absolute counts, but this count is also impacted by effort (e.g. the number of days and number of traps in the study each year). What would you suggest be done moving forward (you are not expected to actually do this) to standardize the juvenile hare population in future analyses?
 
-## Weights 
+## B. Juvenile hare weight comparison and descriptive statistics
 
 Visualize juvenile hare weights. Create a finalized data visualization (or visualizations) in which you compare **juvenile hare weights by sex and site (grid)** (ignore other variables). You should include groups where these variables are not recorded (`NA`). Include finalized figure captions below your visualization(s).
 
 ```{r}
 juvenile_hares <- hares %>% 
-  filter(age == "j") 
+  filter(age == "j")
 
-ggplot(data = juvenile_hares, aes(y = sex, x = weight)) +
-  geom_line()
+ggplot(data = juvenile_hares, aes(x = sex, y = weight)) +
+  geom_beeswarm(aes(color = sex)) +
+  facet_wrap(~grid) +
+  scale_color_manual(values = c("goldenrod2","cyan4","coral")) +
+  geom_boxplot(fill = NA, width = 0.2, outlier.color = NA) +
+  theme_minimal() +
+   stat_summary(fun=mean, 
+               geom="point", 
+               shape=20, 
+               size=4, 
+               color="black", 
+               fill="black") +
+  labs(x = "Hare Sampling Site",
+       y = "Weight (g)")
 ```
 
 Then, in 2 - 3 sentences below your visualization(s) describe in text the main takeaways that you would want the audience to understand from your figures.
@@ -84,7 +102,13 @@ Effect size (Cohen's *d*) (see effsize::cohen.d() example in the Lab 5 key)
 Outcome of an unpaired two-sample t-test
  
 ```{r}
+hares_summary <- juvenile_hares %>% 
+  group_by(sex) %>% 
+  summarize(mean_weight = round(mean(weight, na.rm = TRUE),2),
+            sd_weight = round(sd(weight, na.rm = TRUE),2),
+            n = n())
 
+hares_summary
 ```
  
 Note: Exploratory graphs (e.g. histograms, QQ-plots) to explore assumptions of your t-test should not show up in your final knitted document, but you DO still need to create and think about them to determine whether a t-test is appropriate. If you want keep the code chunk containing those exploratory visualizations in your .Rmd but not appear in the knitted doc, you can add `include = FALSE` in the code chunk header.
