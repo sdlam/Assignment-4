@@ -126,25 +126,91 @@ hares_summary %>%
   kable_styling(full_width = FALSE)
 ```
  
-Note: Exploratory graphs (e.g. histograms, QQ-plots) to explore assumptions of your t-test should not show up in your final knitted document, but you DO still need to create and think about them to determine whether a t-test is appropriate. If you want keep the code chunk containing those exploratory visualizations in your .Rmd but not appear in the knitted doc, you can add `include = FALSE` in the code chunk header.
 ```{r}
+# T-test code: 
 
+# Pull vectors of flipper lengths for male & female gentoo penguins
+
+m_gentoo <- penguins %>% 
+  filter(species == "Gentoo", sex == "male") %>% 
+  pull(flipper_length_mm)
+
+f_gentoo <- penguins %>% 
+  filter(species == "Gentoo", sex == "female") %>% 
+  pull(flipper_length_mm)
+
+# Plot histograms & qq-plots to check assumptions
+hist(m_gentoo) # Looks normal
+qqnorm(m_gentoo) # Relatively linear
+hist(f_gentoo) # Possibly a bit negatively skewed
+qqnorm(f_gentoo) # Looks very linear
+
+# Overall: assumptions of normality hold, & sample size additionally >> Central Limit Theorem (means will be normally distributed). Two-sample t-test OK for means comparison! 
+
+# Run the t-test:
+gentoo_ttest <- t.test(m_gentoo, f_gentoo)
+
+# Get the tidy model results to call outputs in-line: 
+gentoo_ttest_tidy <- tidy(gentoo_ttest)
+
+# Get the means & SDs for each: 
+male_mean <- mean(m_gentoo)
+female_mean <- mean(f_gentoo)
+male_sd <- sd(m_gentoo)
+female_sd <- sd(f_gentoo)
+
+# Get the effect size: 
+gentoo_effsize <- cohen.d(m_gentoo, f_gentoo)
+```
+ 
+Note: Exploratory graphs (e.g. histograms, QQ-plots) to explore assumptions of your t-test should not show up in your final knitted document, but you DO still need to create and think about them to determine whether a t-test is appropriate. If you want keep the code chunk containing those exploratory visualizations in your .Rmd but not appear in the knitted doc, you can add `include = FALSE` in the code chunk header.
+
+```{r include = FALSE}
+ggplot(data = juvenile_hares, aes(x = weight)) +
+  geom_histogram(bins = 12) +
+  facet_wrap(~ sex)
+
+ggplot(data = juvenile_hares, aes(sample = weight)) +
+  geom_qq() +
+  facet_wrap(~ sex)
 ```
 
 Relationship between juvenile weight & hind foot length. Explore the relationship between juvenile snowshoe hare hind foot length (variable `hindft`, recorded in millimeters), and weight. Include all juvenile hares in the study. Create a final visualization of juvenile hare hind foot length versus weight. Include a figure caption.
 
 ```{r}
 ggplot(data = juvenile_hares, aes(x = hindft, y = weight)) +
-  geom_point() +
+  geom_point(aes(color = sex, pch = sex)) +
+   scale_shape_manual(values = c(16,17,18), 
+                     name = "Hare Sex") +
+  scale_color_manual(values = c("goldenrod2","cyan4","grey6"), 
+                     name = "Hare Sex") +
   labs(x = "Hind Foot Length (mm)",
        y = "Hare Weight (g)") +
-  theme_minimal()
+  theme_minimal() 
 ```
 
 Upon seeing your graph, your “boss” tells you to try out linear regression to describe how juvenile snowshoe hare weight changes with respect to hind foot length. Try it out (the only variables you are expected to include here are hind foot length and weight, using data for all juvenile hares in the data, e.g. you are not expected to explore impacts of sex, site, etc.), and check the model diagnostics.
 
 ```{r}
+# Do linear regression
+hares_lm <- lm(weight ~ hindft, data = juvenile_hares)
 
+# Get tidy versions of the model output to call later on in text
+hares_lm_tidy <- tidy(hares_lm)
+hares_lm_glance <- glance(hares_lm)
+
+# See model diagnostics:
+# plot(hares_lm)
+
+# Get Pearson's r correlation
+hares_cor <- cor.test(juvenile_hares$weight, juvenile_hares$hindft)
+
+# Tidy version of correlation output:
+hares_cor_tidy <- tidy(hares_cor)
+
+ggplot(data = juvenile_hares, aes(x = hindft, y = weight)) +
+  geom_point() +
+  geom_smooth(method = "lm")
 ```
 
 In 2 - 3 sentences below your figure, describe the outcome of your linear regression exploration (e.g. slope interpretation, R2 value, and Pearson's r correlation) and touch briefly on which assumption(s) of linear regression may be a concern, and additional thoughts you have about how well (or not well…) the linear model describes the relationship. What worries you? 
