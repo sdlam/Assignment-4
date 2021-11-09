@@ -126,46 +126,45 @@ hares_summary %>%
   kable_styling(full_width = FALSE)
 ```
  
-```{r}
+```{r include = FALSE}
 # T-test code: 
+# Pull vectors of weights for male & female juvenile hares
+m_juvenile <- juvenile_hares %>% 
+  filter(sex == "male") %>% 
+  pull(weight)
 
-# Pull vectors of flipper lengths for male & female gentoo penguins
-
-m_gentoo <- penguins %>% 
-  filter(species == "Gentoo", sex == "male") %>% 
-  pull(flipper_length_mm)
-
-f_gentoo <- penguins %>% 
-  filter(species == "Gentoo", sex == "female") %>% 
-  pull(flipper_length_mm)
+f_juvenile <- juvenile_hares %>% 
+  filter(sex == "female") %>% 
+  pull(weight)
 
 # Plot histograms & qq-plots to check assumptions
-hist(m_gentoo) # Looks normal
-qqnorm(m_gentoo) # Relatively linear
-hist(f_gentoo) # Possibly a bit negatively skewed
-qqnorm(f_gentoo) # Looks very linear
+hist(m_juvenile) # Looks normal
+qqnorm(m_juvenile) # Relatively linear
+hist(f_juvenile) # Possibly a bit negatively skewed
+qqnorm(f_juvenile) # Looks very linear
 
 # Overall: assumptions of normality hold, & sample size additionally >> Central Limit Theorem (means will be normally distributed). Two-sample t-test OK for means comparison! 
 
 # Run the t-test:
-gentoo_ttest <- t.test(m_gentoo, f_gentoo)
+hares_ttest <- t.test(m_juvenile, f_juvenile)
 
 # Get the tidy model results to call outputs in-line: 
-gentoo_ttest_tidy <- tidy(gentoo_ttest)
+hares_ttest_tidy <- tidy(hares_ttest)
 
 # Get the means & SDs for each: 
-male_mean <- mean(m_gentoo)
-female_mean <- mean(f_gentoo)
-male_sd <- sd(m_gentoo)
-female_sd <- sd(f_gentoo)
+male_mean <- mean(m_juvenile)
+female_mean <- mean(f_juvenile)
+male_sd <- sd(m_juvenile)
+female_sd <- sd(f_juvenile)
 
 # Get the effect size: 
-gentoo_effsize <- cohen.d(m_gentoo, f_gentoo)
+hares_effsize <- cohen.d(m_juvenile, f_juvenile)
 ```
  
 Note: Exploratory graphs (e.g. histograms, QQ-plots) to explore assumptions of your t-test should not show up in your final knitted document, but you DO still need to create and think about them to determine whether a t-test is appropriate. If you want keep the code chunk containing those exploratory visualizations in your .Rmd but not appear in the knitted doc, you can add `include = FALSE` in the code chunk header.
 
 ```{r include = FALSE}
+# Another way to manually make exploratory graphs and think about normality
 ggplot(data = juvenile_hares, aes(x = weight)) +
   geom_histogram(bins = 12) +
   facet_wrap(~ sex)
