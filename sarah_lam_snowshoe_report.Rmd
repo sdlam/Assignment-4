@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 
 library(tidyverse)
 library(here)
@@ -15,6 +15,7 @@ library(kableExtra)
 library(lubridate)
 library(ggbeeswarm)
 library(effsize)
+library(broom)
 ```
 
 
@@ -22,7 +23,7 @@ library(effsize)
 
 Introduction: A 4 - 5 sentence "mini-introduction" to what this study is exploring, including basic background information about the subject, site and study (with citations as needed), and a brief overview of what is included in the exploratory report. You should probably do this last so you know what’s contained in the report.
 
-# 2. Data and Analyses
+# 2. Data
 
 A 3 - 4 sentence section in which you briefly describe the data, including citation & credit as needed, and provide an overview of the main analysis, statistical methods and tools used.
 
@@ -47,7 +48,7 @@ juvenile_traps <- hares %>%
   summarize(count = n())
   
 ggplot(data = juvenile_traps, aes(x = year, y = count)) +
-  geom_line() +
+  geom_line(color = "cadetblue4", size = 1.5) +
   scale_x_continuous(breaks = 1999:2012) +
   theme_minimal() +
   labs(x = "Year",
@@ -63,9 +64,7 @@ These are absolute counts, but this count is also impacted by effort (e.g. the n
 
 ## B. Juvenile hare weight comparison and descriptive statistics
 
-Visualize juvenile hare weights. Create a finalized data visualization (or visualizations) in which you compare **juvenile hare weights by sex and site (grid)** (ignore other variables). You should include groups where these variables are not recorded (`NA`). Include finalized figure captions below your visualization(s).
-
-```{r}
+```{r, fig.cap = "}
 juvenile_hares <- hares %>% 
   filter(age == "j") %>% 
   mutate(sex = case_when(sex == "f" ~ "female",
@@ -78,7 +77,7 @@ ggplot(data = juvenile_hares, aes(x = sex, y = weight)) +
   geom_beeswarm(aes(color = sex), 
                 show.legend = FALSE) +
   facet_wrap(~grid_full) +
-  scale_color_manual(values = c("goldenrod2","cyan4","grey")) +
+  scale_color_manual(values = c("coral1","aquamarine","gray88")) +
   geom_boxplot(fill = NA, width = 0.2, outlier.color = NA) +
   theme_linedraw() +
    stat_summary(fun=mean, 
@@ -100,14 +99,6 @@ Am I showing the audience the data, summary statistics, or both?
 Have I updated graph labels, headers in facets, etc. to make it as straightforward as possible for viewers?
 Have I simplified and finalized my data visualization(s) to include components that are useful for the audience?
 
-Juvenile weight comparison (male & female snowshoe hares). Further compare mean weights for **juvenile male and female snowshoe hares** included in this study. In this section, you should include:
-
-A finalized table containing the mean, standard deviation, and sample size for male and female juvenile snowshoe hares, with a table caption (remember, a table caption should be placed *above* the table in your report)
-A 2 - 3 sentence comprehensive statement of the means comparison, including at least:
-The actual difference in means
-Effect size (Cohen's *d*) (see effsize::cohen.d() example in the Lab 5 key)
-Outcome of an unpaired two-sample t-test
- 
 ```{r}
 hares_summary <- juvenile_hares %>% 
   group_by(sex) %>% 
@@ -127,9 +118,8 @@ hares_summary %>%
 ```
  
 ```{r include = FALSE}
-# T-test code: 
-# Pull vectors of weights for male & female juvenile hares
-m_juvenile <- juvenile_hares %>% 
+# Runnign a t-test
+m_juvenile <- juvenile_hares %>% # Pull vectors of weights for male & female juvenile hares
   filter(sex == "male") %>% 
   pull(weight)
 
@@ -160,8 +150,8 @@ female_sd <- sd(f_juvenile)
 # Get the effect size: 
 hares_effsize <- cohen.d(m_juvenile, f_juvenile)
 ```
- 
-Note: Exploratory graphs (e.g. histograms, QQ-plots) to explore assumptions of your t-test should not show up in your final knitted document, but you DO still need to create and think about them to determine whether a t-test is appropriate. If you want keep the code chunk containing those exploratory visualizations in your .Rmd but not appear in the knitted doc, you can add `include = FALSE` in the code chunk header.
+
+On average, adult male gentoo penguins have longer flippers than adult female gentoos (`r round(male_mean,2)` $\pm$ `r round(male_sd, 2)` and `r round(female_mean,2)` $\pm$ `r round(female_sd, 2)` mm, respectively; mean $\pm$ 1 standard deviation). While the absolute difference in means is `r round(male_mean, 2) - round(female_mean, 2)` mm (a `r round((male_mean - female_mean)/((male_mean + female_mean)/2)*100, 2)`% difference), the difference in means is significant (Welch's two-sample t-test: t(`r round(gentoo_ttest_tidy$parameter,2)`) = `r round(gentoo_ttest_tidy$statistic,2)`, p < 0.001), and the effect size is large (Cohen's *d* = `r round(gentoo_effsize$estimate,2)`).
 
 ```{r include = FALSE}
 # Another way to manually make exploratory graphs and think about normality
@@ -174,7 +164,6 @@ ggplot(data = juvenile_hares, aes(sample = weight)) +
   facet_wrap(~ sex)
 ```
 
-Relationship between juvenile weight & hind foot length. Explore the relationship between juvenile snowshoe hare hind foot length (variable `hindft`, recorded in millimeters), and weight. Include all juvenile hares in the study. Create a final visualization of juvenile hare hind foot length versus weight. Include a figure caption.
 
 ```{r}
 ggplot(data = juvenile_hares, aes(x = hindft, y = weight)) +
@@ -199,7 +188,7 @@ hares_lm_tidy <- tidy(hares_lm)
 hares_lm_glance <- glance(hares_lm)
 
 # See model diagnostics:
-# plot(hares_lm)
+plot(hares_lm)
 
 # Get Pearson's r correlation
 hares_cor <- cor.test(juvenile_hares$weight, juvenile_hares$hindft)
