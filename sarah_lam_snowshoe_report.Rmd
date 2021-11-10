@@ -176,7 +176,7 @@ hares_cor_tidy <- tidy(hares_cor) #tidy version for in-line code
 
 The relationship between hind foot length and weight appears somewhat linear, (Figure 3). Simple linear regression reveals that hind foot length may significantly predict weight, but only `r round(hares_lm_glance$r.squared,2)*100`% of variance in weight is explained by hind foot length (p < 0.001, R^2^ = `r round(hares_lm_glance$r.squared,2)`). The regression has an average slope of $\beta$ = `r round(hares_lm_tidy$estimate[2], 2)` g mm^-1^ (i.e., for each one millimeter increase in hindfoot length we expect an average increase in body mass of `r round(hares_lm_tidy$estimate[2], 2)` g). Therefore, hind foot length and weight are weakly, but significantly, positively correlated (Pearson's *r* = `r round(hares_cor_tidy$estimate,2)`, p < 0.001). Diagnostic plots (not included) suggest fairly normally distributed residuals, plus the central limit theorem holds for a sample size this large which means the the means should be normally distributed. However, the diagnostic plots also reveal that the residuals are not homoscedastic. This is concerning because homoscedasticity is one of the four main assumptions of a simple linear regression.
 
-**Fig. 4** Model summary for simple linear regression of the relationship between hare weight (g) and hind foot length (mm).
+**Fig. 4** Model summary for simple linear regression of the relationship between hare weight (g) and hind foot length (hindft, mm).
 ```{r, results = "asis"}
 stargazer(hares_lm, type = "html")
 ```
