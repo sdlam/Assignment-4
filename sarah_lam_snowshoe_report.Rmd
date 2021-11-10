@@ -26,8 +26,6 @@ This report provides an exploratory overview of differences in weights for juven
 ### 2. Data and analyses
 Snowshoe hare structural size measurements were collected and made available by Dr. Knut Kielland and colleagues at the Bonanza Creek Long Term Ecological Research (LTER) network site in Alaska. The data contain observations for 3197 unique snowshoe hares, collected over fourteen years (1999 - 2012). Following exploratory data visualization, weights between male and female hares are analyzed by two-sample t-tests using a significance level (α) of 0.05 throughout. Differences between groups are described by Cohen’s d effect size. The relationship between hind foot length and weight is explored by simple linear regression. All analyses are in R version 4.1.1 using RStudio version 1.4.1717.
 
-Kielland, K., F.S. Chapin, R.W. Ruess, and Bonanza Creek LTER. 2017. Snowshoe hare physical data in Bonanza Creek Experimental Forest: 1999-Present ver 22. Environmental Data Initiative. https://doi.org/10.6073/pasta/03dce4856d79b91557d8e6ce2cbcdc14
-
 ```{r}
 hares <- read_csv(here("data", "bonanza_hares.csv"))
 ```
@@ -183,7 +181,7 @@ The relationship between hind foot length and weight appears somewhat linear, (F
 stargazer(hares_lm, type = "html")
 ```
 
-### Summary: 
+### Summary
 
 Exploratory data analysis reveals the following initial findings:
 
@@ -197,8 +195,9 @@ Next steps:
 - Analysis of sampling sites to explore size correlation and habitat
 
 
-Addtional citations: 
+### Citations
 
  Hlavac, Marek (2018). stargazer: Well-Formatted Regression and Summary Statistics Tables.
  R package version 5.2.2. https://CRAN.R-project.org/package=stargazer 
 
+Kielland, K., F.S. Chapin, R.W. Ruess, and Bonanza Creek LTER. 2017. Snowshoe hare physical data in Bonanza Creek Experimental Forest: 1999-Present ver 22. Environmental Data Initiative. https://doi.org/10.6073/pasta/03dce4856d79b91557d8e6ce2cbcdc14
